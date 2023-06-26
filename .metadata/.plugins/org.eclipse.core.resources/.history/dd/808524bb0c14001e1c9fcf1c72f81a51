@@ -1,0 +1,157 @@
+package com.register;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.register.model.User;
+import com.register.repository.IUserRepository;
+import com.register.service.UserServiceImpl;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class RegisterServiceApplicationTests {
+
+    @Mock
+    private IUserRepository userRepository;
+
+    @InjectMocks
+    private UserServiceImpl userService;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testAddUser() {
+        User user = new User("test@example.com", "John Doe", "Address", "1234567890", 1234567890, "password");
+
+        when(userRepository.findById(user.getEmailId())).thenReturn(Optional.empty());
+        when(userRepository.save(user)).thenReturn(user);
+
+        User result = userService.addUser(user);
+
+        assertEquals(user, result);
+        verify(userRepository, times(1)).findById(user.getEmailId());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    public void testAddUser_UserAlreadyExists() {
+        User user = new User("test@example.com", "John Doe", "Address", "1234567890", 1234567890, "password");
+
+        when(userRepository.findById(user.getEmailId())).thenReturn(Optional.of(user));
+
+        User result = userService.addUser(user);
+
+        assertEquals(null, result);
+        verify(userRepository, times(1)).findById(user.getEmailId());
+        verify(userRepository, times(0)).save(user);
+    }
+
+    @Test
+    public void testGetAllUsers() {
+        List<User> userList = new ArrayList<>();
+        userList.add(new User("test1@example.com", "John Doe 1", "Address 1", "1234567890", 1234567890, "password"));
+        userList.add(new User("test2@example.com", "John Doe 2", "Address 2", "0987654321", 987654321, "password"));
+
+        when(userRepository.findAll()).thenReturn(userList);
+
+        List<User> result = userService.getAllUsers();
+
+        assertEquals(userList, result);
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetUserById() {
+        User user = new User("test@example.com", "John Doe", "Address", "1234567890", 1234567890, "password");
+
+        when(userRepository.findById(user.getEmailId())).thenReturn(Optional.of(user));
+
+        User result = userService.getUserById(user.getEmailId());
+
+        assertEquals(user, result);
+        verify(userRepository, times(1)).findById(user.getEmailId());
+    }
+
+    @Test
+    public void testGetUserById_UserNotExists() {
+        String emailId = "nonexistent@example.com";
+
+        when(userRepository.findById(emailId)).thenReturn(Optional.empty());
+
+        User result = userService.getUserById(emailId);
+
+        assertEquals(null, result);
+        verify(userRepository, times(1)).findById(emailId);
+    }
+
+    @Test
+    public void testUpdateUser() {
+        User existingUser = new User("test@example.com", "John Doe", "Address", "1234567890", 1234567890, "password");
+        User updatedUser = new User("test@example.com", "Updated John Doe", "Updated Address", "0987654321", 987654321, "updated_password");
+
+        when(userRepository.findById(existingUser.getEmailId())).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(existingUser)).thenReturn(updatedUser);
+
+        User result = userService.updateUser(updatedUser, existingUser.getEmailId());
+
+        assertEquals(updatedUser, result);
+        verify(userRepository, times(1)).findById(existingUser.getEmailId());
+        verify(userRepository, times(1)).save(existingUser);
+    }
+
+    @Test
+    public void testUpdateUser_UserNotExists() {
+        String emailId = "nonexistent@example.com";
+        User updatedUser = new User("test@example.com", "Updated John Doe", "Updated Address", "0987654321", 987654321, "updated_password");
+
+        when(userRepository.findById(emailId)).thenReturn(Optional.empty());
+
+        User result = userService.updateUser(updatedUser, emailId);
+
+        assertEquals(null, result);
+        verify(userRepository, times(1)).findById(emailId);
+        verify(userRepository, times(0)).save(any(User.class));
+    }
+
+    @Test
+    public void testDelUser() {
+        User user = new User("test@example.com", "John Doe", "Address", "1234567890", 1234567890, "password");
+
+        when(userRepository.findById(user.getEmailId())).thenReturn(Optional.of(user));
+
+        boolean result = userService.delUser(user.getEmailId());
+
+        assertEquals(true, result);
+        verify(userRepository, times(1)).findById(user.getEmailId());
+        verify(userRepository, times(1)).delete(user);
+    }
+
+    @Test
+    public void testDelUser_UserNotExists() {
+        String emailId = "nonexistent@example.com";
+
+        when(userRepository.findById(emailId)).thenReturn(Optional.empty());
+
+        boolean result = userService.delUser(emailId);
+
+        assertEquals(false, result);
+        verify(userRepository, times(1)).findById(emailId);
+        verify(userRepository, times(0)).delete(any(User.class));
+    }
+}
+

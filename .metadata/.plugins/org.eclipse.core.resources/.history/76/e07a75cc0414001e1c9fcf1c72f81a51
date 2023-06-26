@@ -1,0 +1,43 @@
+package com.register.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.register.model.User;
+import com.register.repository.IUserRepository;
+
+public class UserServiceImpl implements IUserService {
+
+	@Autowired
+	public IUserRepository userRepository;
+	
+	@Override
+	public User addUser(User user) {
+		return userRepository.save(user);
+	}
+
+	@Override
+	public List<User> getAllUsers() {
+		return userRepository.findAll();
+	}
+
+	@Override
+	public User getUserById(String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public User updateUser(User user, String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean delUser(String email) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

@@ -1,0 +1,73 @@
+package com.register.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.register.model.User;
+import com.register.repository.IUserRepository;
+
+public class UserServiceImpl implements IUserService {
+
+	@Autowired
+	public IUserRepository userRepository;
+	
+	@Override
+	public User addUser(User user) {
+		return userRepository.save(user);
+	}
+
+	@Override
+	public List<User> getAllUsers() {
+		return userRepository.findAll();
+	}
+
+	@Override
+	public User getUserById(String email) {
+		Optional<User> userOptional = this.userRepository.findById(email);
+
+    	User uObj = null;
+        if(userOptional.isPresent())
+        {
+        	System.out.println("Record Exists and ready for Update !!!");
+        	uObj = userOptional.get();
+        }
+        else
+        {
+        	System.out.println("ScheduleTour does not exists");
+        }
+
+        return uObj;
+}
+	
+
+	@Override
+	public User updateUser(User user, String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean delUser(String email) {
+		Optional<User> tourOptional = this.userRepository.findById(email);
+
+    	boolean status=false;
+    	
+//    	Checking whether user id exists or not
+        if(tourOptional.isPresent())
+        {
+        	System.out.println("Record Exists and ready for Delete !!!");
+        	
+//        	Extracting the user details as user object from optional
+        	this.userRepository.delete(tourOptional.get());
+        	status=true;
+        }
+        else
+        {
+        	System.out.println("User details does not exits for delete ..");
+        }
+        return status;
+	}
+
+}
